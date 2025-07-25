@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VPN Manager - Sistema de Gestión</title>
-    <link rel="icon" href="ASSETS/IMG/cris.png" type="img/png">
     <link rel="icon" href="cris.png" type="img/png">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/phosphor-icons/2.0.2/phosphor.min.css" rel="stylesheet">
@@ -827,9 +826,32 @@
             // Check if accessing public app view
             const urlParams = new URLSearchParams(window.location.search);
             const publicAppKey = urlParams.get('app');
+            const rawParam = urlParams.get('raw'); // Alternative parameter for raw access
             
-            if (publicAppKey) {
-                showPublicView(publicAppKey);
+            if (publicAppKey || rawParam) {
+                const appKey = publicAppKey || rawParam;
+                
+                // Enhanced API request detection
+                const userAgent = navigator.userAgent.toLowerCase();
+                const isApiRequest = rawParam || // Explicit raw parameter
+                                   !userAgent.includes('mozilla') || 
+                                   userAgent.includes('okhttp') || 
+                                   userAgent.includes('java') ||
+                                   userAgent.includes('android') ||
+                                   userAgent.includes('dalvik') ||
+                                   document.referrer === '' ||
+                                   window.location.search.includes('raw=');
+                
+                // Additional check: if no DOM elements are interactive, likely API request
+                const hasInteractiveElements = document.querySelector('input, button, form');
+                
+                if (isApiRequest || rawParam) {
+                    // Return raw content for API requests
+                    loadRawContent(appKey);
+                } else {
+                    // Show public view for browser requests
+                    showPublicView(appKey);
+                }
                 return;
             }
 
@@ -992,6 +1014,89 @@
             publicRawScreen.classList.add('hidden');
             userEmail.textContent = user.email;
             loadApps();
+        }
+
+        // Raw Content Loader for API requests
+        async function loadRawContent(appKey) {
+            try {
+                // Decode URL component (handle %20 spaces, etc.)
+                let decodedAppKey = decodeURIComponent(appKey);
+                
+                console.log('Loading raw content for:', decodedAppKey);
+                console.log('User Agent:', navigator.userAgent);
+                
+                // Try exact match first
+                let appRef = ref(database, `vpn-apps/${decodedAppKey}`);
+                let snapshot = await get(appRef);
+                let appData = snapshot.val();
+                
+                // If not found, try to find case-insensitive match
+                if (!appData) {
+                    const appsRef = ref(database, 'vpn-apps');
+                    const allApps = await get(appsRef);
+                    const allAppsData = allApps.val();
+                    
+                    if (allAppsData) {
+                        const foundKey = Object.keys(allAppsData).find(key => 
+                            key.toLowerCase() === decodedAppKey.toLowerCase()
+                        );
+                        
+                        if (foundKey) {
+                            appData = allAppsData[foundKey];
+                            console.log('Found case-insensitive match:', foundKey);
+                        }
+                    }
+                }
+
+                if (appData && appData.hasContent && appData.content) {
+                    console.log('Serving raw content, size:', appData.content.length);
+                    
+                    // Clear the page and show only raw content
+                    document.documentElement.innerHTML = `
+                        <head>
+                            <meta charset="UTF-8">
+                            <title>VPN Config - ${appData.name || decodedAppKey}</title>
+                            <style>
+                                body { 
+                                    margin: 0; 
+                                    padding: 0; 
+                                    font-family: monospace; 
+                                    white-space: pre-wrap; 
+                                    word-wrap: break-word;
+                                    background: #000;
+                                    color: #0f0;
+                                    font-size: 12px;
+                                    line-height: 1.2;
+                                }
+                            </style>
+                        </head>
+                        <body></body>
+                    `;
+                    
+                    // Add content as text node to preserve formatting
+                    document.body.textContent = appData.content;
+                    
+                } else {
+                    console.log('Configuration not found or empty for:', decodedAppKey);
+                    
+                    // Return error message for API
+                    document.documentElement.innerHTML = `
+                        <head><meta charset="UTF-8"><title>Error</title></head>
+                        <body style="margin:0;padding:20px;font-family:monospace;background:#000;color:#f00;">
+                            Error: Configuration "${decodedAppKey}" not found or empty
+                        </body>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading raw content:', error);
+                
+                document.documentElement.innerHTML = `
+                    <head><meta charset="UTF-8"><title>Error</title></head>
+                    <body style="margin:0;padding:20px;font-family:monospace;background:#000;color:#f00;">
+                        Error: Failed to load configuration - ${error.message}
+                    </body>
+                `;
+            }
         }
 
         function showPublicView(appKey) {
@@ -1174,10 +1279,14 @@
 
             if (currentFileContent) {
                 const publicLink = `${window.location.origin}${window.location.pathname}?app=${encodeURIComponent(appNameValue)}`;
+                const rawLink = `${window.location.origin}${window.location.pathname}?raw=${encodeURIComponent(appNameValue)}`;
                 showStatus(`✅ App "${appNameValue}" creada con contenido`, 'success', 'uploadStatus');
                 setTimeout(() => {
-                    showStatus(`🔗 Enlace público: ${publicLink}`, 'success', 'uploadStatus');
+                    showStatus(`🌐 Web: ${publicLink}`, 'success', 'uploadStatus');
                 }, 2000);
+                setTimeout(() => {
+                    showStatus(`📱 App VPN: ${rawLink}`, 'success', 'uploadStatus');
+                }, 4000);
             } else {
                 showStatus(`✅ App "${appNameValue}" creada. Ahora puedes subir el archivo`, 'success', 'uploadStatus');
             }
@@ -1208,10 +1317,14 @@
             await set(appRef, updatedData);
 
             const publicLink = `${window.location.origin}${window.location.pathname}?app=${encodeURIComponent(editingAppKey)}`;
+            const rawLink = `${window.location.origin}${window.location.pathname}?raw=${encodeURIComponent(editingAppKey)}`;
             showStatus(`✅ App "${appNameValue}" actualizada exitosamente`, 'success', 'uploadStatus');
             setTimeout(() => {
-                showStatus(`🔗 Enlace público: ${publicLink}`, 'success', 'uploadStatus');
+                showStatus(`🌐 Web: ${publicLink}`, 'success', 'uploadStatus');
             }, 2000);
+            setTimeout(() => {
+                showStatus(`📱 App VPN: ${rawLink}`, 'success', 'uploadStatus');
+            }, 4000);
             
             clearForm();
             loadApps();
@@ -1261,6 +1374,7 @@
 
             const sizeKB = app.hasContent ? (app.size / 1024).toFixed(2) : '0';
             const publicLink = `${window.location.origin}${window.location.pathname}?app=${encodeURIComponent(app.key)}`;
+            const rawLink = `${window.location.origin}${window.location.pathname}?raw=${encodeURIComponent(app.key)}`;
             const statusBadge = app.hasContent 
                 ? '<span style="background: #2ed573; color: white; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 600;">✓ CON ARCHIVO</span>'
                 : '<span style="background: #ff6b6b; color: white; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 600;">⚠ SIN ARCHIVO</span>';
@@ -1283,8 +1397,11 @@
                     
                     ${app.hasContent ? `
                         <div style="margin: 12px 0; padding: 8px; background: rgba(0,0,0,0.2); border-radius: 6px; font-size: 11px; font-family: monospace; word-break: break-all; color: var(--text-secondary);">
-                            <strong>🔗 Enlace público:</strong><br>
+                            <strong>🌐 Enlace Web:</strong><br>
                             ${publicLink}
+                            <br><br>
+                            <strong>📱 Enlace App VPN:</strong><br>
+                            ${rawLink}
                         </div>
                     ` : ''}
                     
@@ -1294,7 +1411,10 @@
                                 <i class="ph-code"></i> Ver Raw
                             </button>
                             <button class="btn btn-small" onclick="copyPublicLink('${publicLink}')">
-                                <i class="ph-link"></i> Copiar Enlace
+                                <i class="ph-link"></i> Web
+                            </button>
+                            <button class="btn btn-small" onclick="copyPublicLink('${rawLink}')">
+                                <i class="ph-download"></i> App
                             </button>
                         ` : ''}
                         <button class="btn btn-small btn-secondary" onclick="editApp('${app.key}', '${app.name}')">
@@ -1326,13 +1446,13 @@
             }
         };
 
-        window.editApp = function(appKey, appName) {
+        window.editApp = function(appKey, appNameValue) {
             editingAppKey = appKey;
-            appName = appName;
+            appName.value = appNameValue;
             appName.disabled = true;
             updateUIState();
             document.querySelector('.grid-2').scrollIntoView({ behavior: 'smooth' });
-            showStatus(`Modo edición: ${appName}. Sube un archivo para actualizar.`, 'success', 'uploadStatus');
+            showStatus(`Modo edición: ${appNameValue}. Sube un archivo para actualizar.`, 'success', 'uploadStatus');
         };
 
         window.copyPublicLink = function(link) {
@@ -1598,6 +1718,17 @@
 
         // Initialize
         updateUIState();
+        
+        // Check for immediate raw content request (before auth)
+        const urlParams = new URLSearchParams(window.location.search);
+        const rawParam = urlParams.get('raw');
+        const appParam = urlParams.get('app');
+        
+        if (rawParam || (appParam && navigator.userAgent.toLowerCase().includes('java'))) {
+            console.log('Immediate raw content request detected');
+            loadRawContent(rawParam || appParam);
+        }
+        
         console.log('🔥 VPN Manager initialized successfully');
     </script>
 </body>
