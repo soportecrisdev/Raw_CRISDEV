@@ -4,14 +4,577 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VPN Manager - Sistema de Gestión</title>
-    <link rel="icon" href="assets/IMG/cris.png" type="image/png">
+    <link rel="icon" href="assets/IMG/cris.png" type="img/png">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/phosphor-icons/2.0.2/phosphor.min.css" rel="stylesheet">
     
-    <!-- CSS Files -->
-    <link rel="stylesheet" href="assets/css/global.css">
-    <link rel="stylesheet" href="assets/css/login.css">
-    <link rel="stylesheet" href="assets/css/dashboard.css">
+    <style>
+        /* ==================== GLOBAL STYLES ==================== */
+        :root {
+            --primary-color: #3A63F2;
+            --secondary-color: #6F7DFB;
+            --text-primary: #FFFFFF;
+            --text-secondary: #CFCFCF;
+            --bg-dark: #0a0b1a;
+            --bg-card: rgba(255, 255, 255, 0.05);
+            --glow-primary: rgba(58, 99, 242, 0.3);
+            --glow-secondary: rgba(111, 125, 251, 0.2);
+            --font-family: 'Poppins', sans-serif;
+            --border-radius: 10px;
+            --transition: all 0.3s ease-in-out;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background: linear-gradient(135deg, #0a0b1a 0%, #1a1b3a 50%, #2a1b4a 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 30%, var(--glow-primary) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, var(--glow-secondary) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(58, 99, 242, 0.1) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--border-radius);
+            backdrop-filter: blur(20px);
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.3),
+                0 0 0 1px rgba(255, 255, 255, 0.05),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 
+                0 30px 60px rgba(0, 0, 0, 0.4),
+                0 0 30px var(--glow-primary),
+                0 0 0 1px rgba(255, 255, 255, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: var(--text-primary);
+            border: none;
+            padding: 12px 24px;
+            border-radius: var(--border-radius);
+            font-family: var(--font-family);
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 
+                0 10px 25px rgba(58, 99, 242, 0.4),
+                0 0 20px var(--glow-primary);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            background: rgba(255, 255, 255, 0.1);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff4757, #ff3742);
+        }
+
+        .btn-danger:hover {
+            box-shadow: 
+                0 10px 25px rgba(255, 71, 87, 0.4),
+                0 0 20px rgba(255, 71, 87, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 
+                0 10px 25px rgba(255, 255, 255, 0.1),
+                0 0 20px rgba(255, 255, 255, 0.05);
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+            min-width: auto;
+        }
+
+        .input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--border-radius);
+            padding: 12px 16px;
+            color: var(--text-primary);
+            font-family: var(--font-family);
+            font-size: 14px;
+            width: 100%;
+            transition: var(--transition);
+        }
+
+        .input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px var(--glow-primary);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .glow-text {
+            text-shadow: 0 0 20px currentColor;
+        }
+
+        .status {
+            padding: 12px 16px;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            font-size: 14px;
+            margin-top: 16px;
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .status.show {
+            opacity: 1;
+        }
+
+        .status.success {
+            background: rgba(46, 213, 115, 0.1);
+            color: #2ed573;
+            border: 1px solid rgba(46, 213, 115, 0.3);
+        }
+
+        .status.error {
+            background: rgba(255, 71, 87, 0.1);
+            color: #ff4757;
+            border: 1px solid rgba(255, 71, 87, 0.3);
+        }
+
+        /* ==================== LOGIN STYLES ==================== */
+        .login-screen {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-title {
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .login-subtitle {
+            color: var(--text-secondary);
+            font-size: 16px;
+            font-weight: 400;
+        }
+
+        .login-form {
+            padding: 30px;
+        }
+
+        .login-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            text-shadow: 0 0 30px var(--glow-primary);
+        }
+
+        /* ==================== DASHBOARD STYLES ==================== */
+        .navbar {
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--border-radius);
+            padding: 16px 24px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(20px);
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .navbar-user {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .file-upload-area {
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            border-radius: var(--border-radius);
+            padding: 40px;
+            text-align: center;
+            transition: var(--transition);
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        .file-upload-area:hover,
+        .file-upload-area.dragover {
+            border-color: var(--primary-color);
+            background: rgba(58, 99, 242, 0.05);
+            box-shadow: 0 0 30px var(--glow-primary);
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            color: var(--primary-color);
+            margin-bottom: 16px;
+        }
+
+        .upload-text {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .upload-subtext {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .apps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .app-card {
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .app-info h3 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .app-meta {
+            color: var(--text-secondary);
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .app-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+
+        .raw-viewer {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.4;
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 16px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-content {
+            background: var(--bg-dark);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin: 2% auto;
+            padding: 0;
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 1000px;
+            max-height: 90vh;
+            overflow: hidden;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 24px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            color: var(--text-primary);
+        }
+
+        .modal-body {
+            padding: 24px;
+            max-height: calc(90vh - 120px);
+            overflow-y: auto;
+        }
+
+        .file-content {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-break: break-all;
+            color: #00ff88;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .grid-2 {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .navbar {
+                flex-direction: column;
+                gap: 16px;
+                text-align: center;
+            }
+            
+            .navbar-user {
+                justify-content: center;
+            }
+            
+            .apps-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .app-actions {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .btn {
+                padding: 10px 16px;
+                font-size: 12px;
+            }
+            
+            .file-upload-area {
+                padding: 20px;
+            }
+            
+            .upload-icon {
+                font-size: 36px;
+            }
+            
+            .section-title {
+                font-size: 20px;
+            }
+            
+            .app-card {
+                padding: 16px;
+            }
+            
+            .login-form {
+                padding: 20px;
+            }
+            
+            .login-title {
+                font-size: 28px;
+            }
+            
+            .login-icon {
+                font-size: 48px;
+            }
+        }
+    </style>
 </head>
 <body>
     <!-- Login Screen -->
@@ -86,9 +649,9 @@
                     </h2>
                     
                     <div class="file-upload-area" id="uploadArea">
-                        <i class="ph-file-plus upload-icon"></i>
-                        <div class="upload-text">Subir configuración VPN</div>
-                        <div class="upload-subtext">Arrastra tu archivo .json aquí o haz clic para seleccionar</div>
+                        <i class="ph-plus-circle upload-icon"></i>
+                        <div class="upload-text">Crear Nueva App VPN</div>
+                        <div class="upload-subtext">Primero ingresa el nombre de tu app</div>
                         <input type="file" id="fileInput" class="hidden" accept=".json,.txt,.dat,.config">
                     </div>
 
@@ -100,8 +663,8 @@
                     </div>
 
                     <button class="btn" id="saveBtn" style="width: 100%;">
-                        <i class="ph-floppy-disk"></i>
-                        <span id="saveText">Guardar Configuración</span>
+                        <i class="ph-plus"></i>
+                        <span id="saveText">Crear App</span>
                         <span id="saveLoading" class="loading hidden"></span>
                     </button>
 
@@ -197,12 +760,844 @@
         </div>
     </div>
 
-    <!-- JavaScript Files -->
-    <script type="module" src="assets/js/firebase.js"></script>
-    <script type="module" src="assets/js/auth.js"></script>
-    <script type="module" src="assets/js/app_manager.js"></script>
-    <script type="module" src="assets/js/raw_viewer.js"></script>
-    <script type="module" src="assets/js/public_viewer.js"></script>
-    <script type="module" src="assets/js/main.js"></script>
+    <!-- Firebase & JavaScript -->
+    <script type="module">
+        // Import Firebase functions
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+        import { getDatabase, ref, set, get, remove } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyD6TfZc-LJaPM583xR-rogn0V7H-Rx1Kmo",
+            authDomain: "generador-93ce9.firebaseapp.com",
+            databaseURL: "https://generador-93ce9-default-rtdb.firebaseio.com",
+            projectId: "generador-93ce9",
+            storageBucket: "generador-93ce9.firebasestorage.app",
+            messagingSenderId: "888691198773",
+            appId: "1:888691198773:web:7ae10d89dbc53b13d29a7c",
+            measurementId: "G-EVR3CY1YQ4"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const database = getDatabase(app);
+
+        // Global variables
+        let currentFile = null;
+        let currentFileContent = null;
+        let editingAppKey = null;
+
+        // DOM Elements
+        const loginScreen = document.getElementById('loginScreen');
+        const dashboardScreen = document.getElementById('dashboardScreen');
+        const loginEmail = document.getElementById('loginEmail');
+        const loginPassword = document.getElementById('loginPassword');
+        const loginBtn = document.getElementById('loginBtn');
+        const registerBtn = document.getElementById('registerBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const userEmail = document.getElementById('userEmail');
+        
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const appName = document.getElementById('appName');
+        const saveBtn = document.getElementById('saveBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const refreshBtn = document.getElementById('refreshBtn');
+        const appsList = document.getElementById('appsList');
+        
+        const rawModal = document.getElementById('rawModal');
+        const modalAppName = document.getElementById('modalAppName');
+        const fileContent = document.getElementById('fileContent');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const copyContentBtn = document.getElementById('copyContentBtn');
+        const copyLinkBtn = document.getElementById('copyLinkBtn');
+        const closeModal = document.getElementById('closeModal');
+        
+        const publicRawScreen = document.getElementById('publicRawScreen');
+        const publicAppName = document.getElementById('publicAppName');
+        const publicFileContent = document.getElementById('publicFileContent');
+        const publicDownloadBtn = document.getElementById('publicDownloadBtn');
+        const publicCopyBtn = document.getElementById('publicCopyBtn');
+
+        // Authentication State Listener
+        onAuthStateChanged(auth, (user) => {
+            // Check if accessing public app view
+            const urlParams = new URLSearchParams(window.location.search);
+            const publicAppKey = urlParams.get('app');
+            
+            if (publicAppKey) {
+                showPublicView(publicAppKey);
+                return;
+            }
+
+            if (user) {
+                showDashboard(user);
+            } else {
+                showLogin();
+            }
+        });
+
+        // Event Listeners
+        loginBtn.addEventListener('click', handleLogin);
+        registerBtn.addEventListener('click', handleRegister);
+        logoutBtn.addEventListener('click', handleLogout);
+        loginPassword.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleLogin();
+        });
+
+        uploadArea.addEventListener('click', handleUploadAreaClick);
+        fileInput.addEventListener('change', (e) => handleFileSelect(e.target.files));
+        saveBtn.addEventListener('click', handleSave);
+        cancelBtn.addEventListener('click', cancelEdit);
+        refreshBtn.addEventListener('click', loadApps);
+        appName.addEventListener('input', updateUIState);
+
+        // Drag & Drop
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+            });
+        });
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, () => {
+                uploadArea.classList.add('dragover');
+            });
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, () => {
+                uploadArea.classList.remove('dragover');
+            });
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            handleFileSelect(e.dataTransfer.files);
+        });
+
+        // Modal Events
+        closeModal.addEventListener('click', () => hideModal());
+        downloadBtn.addEventListener('click', downloadContent);
+        copyContentBtn.addEventListener('click', copyContent);
+        copyLinkBtn.addEventListener('click', copyPublicLink);
+        publicDownloadBtn.addEventListener('click', downloadPublicContent);
+        publicCopyBtn.addEventListener('click', copyPublicContent);
+
+        rawModal.addEventListener('click', (e) => {
+            if (e.target === rawModal) hideModal();
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && rawModal.style.display === 'block') {
+                hideModal();
+            }
+        });
+
+        // Authentication Functions
+        async function handleLogin() {
+            const email = loginEmail.value.trim();
+            const password = loginPassword.value.trim();
+
+            if (!email || !password) {
+                showStatus('Por favor ingresa email y contraseña', 'error', 'loginStatus');
+                return;
+            }
+
+            setLoading('login', true);
+
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                showStatus('¡Sesión iniciada exitosamente!', 'success', 'loginStatus');
+            } catch (error) {
+                handleAuthError(error);
+            } finally {
+                setLoading('login', false);
+            }
+        }
+
+        async function handleRegister() {
+            const email = loginEmail.value.trim();
+            const password = loginPassword.value.trim();
+
+            if (!email || !password) {
+                showStatus('Por favor ingresa email y contraseña', 'error', 'loginStatus');
+                return;
+            }
+
+            if (password.length < 6) {
+                showStatus('La contraseña debe tener al menos 6 caracteres', 'error', 'loginStatus');
+                return;
+            }
+
+            setLoading('register', true);
+
+            try {
+                await createUserWithEmailAndPassword(auth, email, password);
+                showStatus('¡Cuenta creada exitosamente!', 'success', 'loginStatus');
+            } catch (error) {
+                handleAuthError(error);
+            } finally {
+                setLoading('register', false);
+            }
+        }
+
+        async function handleLogout() {
+            try {
+                await signOut(auth);
+            } catch (error) {
+                console.error('Error al cerrar sesión:', error);
+            }
+        }
+
+        function handleAuthError(error) {
+            let errorMessage = 'Error de autenticación';
+            
+            switch (error.code) {
+                case 'auth/user-not-found':
+                    errorMessage = 'Usuario no encontrado';
+                    break;
+                case 'auth/wrong-password':
+                    errorMessage = 'Contraseña incorrecta';
+                    break;
+                case 'auth/invalid-email':
+                    errorMessage = 'Email inválido';
+                    break;
+                case 'auth/email-already-in-use':
+                    errorMessage = 'El email ya está registrado';
+                    break;
+                case 'auth/weak-password':
+                    errorMessage = 'Contraseña muy débil';
+                    break;
+                case 'auth/too-many-requests':
+                    errorMessage = 'Demasiados intentos. Intenta más tarde';
+                    break;
+            }
+            
+            showStatus(errorMessage, 'error', 'loginStatus');
+        }
+
+        function showLogin() {
+            loginScreen.classList.remove('hidden');
+            dashboardScreen.classList.add('hidden');
+            publicRawScreen.classList.add('hidden');
+        }
+
+        function showDashboard(user) {
+            loginScreen.classList.add('hidden');
+            dashboardScreen.classList.remove('hidden');
+            publicRawScreen.classList.add('hidden');
+            userEmail.textContent = user.email;
+            loadApps();
+        }
+
+        function showPublicView(appKey) {
+            loginScreen.classList.add('hidden');
+            dashboardScreen.classList.add('hidden');
+            publicRawScreen.classList.remove('hidden');
+            loadPublicApp(appKey);
+        }
+
+        // App Management Functions
+        function updateUIState() {
+            const appNameValue = appName.value.trim();
+            const hasFile = currentFileContent !== null;
+            
+            // Show/hide cancel button
+            cancelBtn.style.display = editingAppKey ? 'block' : 'none';
+            
+            if (!appNameValue) {
+                updateUploadArea({
+                    icon: 'ph-plus-circle',
+                    title: 'Crear Nueva App VPN',
+                    subtitle: 'Primero ingresa el nombre de tu app'
+                });
+                saveBtn.innerHTML = '<i class="ph-plus"></i><span id="saveText">Crear App</span><span id="saveLoading" class="loading hidden"></span>';
+                saveBtn.disabled = false;
+            } else if (editingAppKey) {
+                if (hasFile) {
+                    updateUploadArea({
+                        icon: 'ph-check-circle',
+                        title: 'Archivo cargado',
+                        subtitle: 'Listo para actualizar la configuración'
+                    });
+                    saveBtn.innerHTML = '<i class="ph-upload"></i><span id="saveText">Actualizar Configuración</span><span id="saveLoading" class="loading hidden"></span>';
+                    saveBtn.disabled = false;
+                } else {
+                    updateUploadArea({
+                        icon: 'ph-file-plus',
+                        title: 'Actualizar configuración',
+                        subtitle: 'Arrastra tu archivo .json aquí o haz clic para seleccionar'
+                    });
+                    saveBtn.innerHTML = '<i class="ph-upload"></i><span id="saveText">Subir Archivo</span><span id="saveLoading" class="loading hidden"></span>';
+                    saveBtn.disabled = true;
+                }
+            } else {
+                if (hasFile) {
+                    updateUploadArea({
+                        icon: 'ph-check-circle',
+                        title: 'App y archivo listos',
+                        subtitle: 'Todo preparado para crear la app'
+                    });
+                    saveBtn.innerHTML = '<i class="ph-floppy-disk"></i><span id="saveText">Crear App con Archivo</span><span id="saveLoading" class="loading hidden"></span>';
+                } else {
+                    updateUploadArea({
+                        icon: 'ph-folder-plus',
+                        title: 'Crear app o subir archivo',
+                        subtitle: 'Puedes crear la app vacía o arrastrar un archivo'
+                    });
+                    saveBtn.innerHTML = '<i class="ph-plus"></i><span id="saveText">Crear App Vacía</span><span id="saveLoading" class="loading hidden"></span>';
+                }
+                saveBtn.disabled = false;
+            }
+        }
+
+        function updateUploadArea({ icon, title, subtitle }) {
+            uploadArea.innerHTML = `
+                <i class="${icon} upload-icon"></i>
+                <div class="upload-text">${title}</div>
+                <div class="upload-subtext">${subtitle}</div>
+            `;
+        }
+
+        function handleUploadAreaClick() {
+            const appNameValue = appName.value.trim();
+            
+            if (!appNameValue) {
+                showStatus('Por favor ingresa primero el nombre de la app', 'error', 'uploadStatus');
+                appName.focus();
+                return;
+            }
+            
+            fileInput.click();
+        }
+
+        function handleFileSelect(files) {
+            const appNameValue = appName.value.trim();
+            
+            if (!appNameValue) {
+                showStatus('Por favor ingresa primero el nombre de la app', 'error', 'uploadStatus');
+                appName.focus();
+                return;
+            }
+
+            if (files.length === 0) return;
+
+            const file = files[0];
+            
+            if (file.type.startsWith('text/') || 
+                file.name.match(/\.(json|txt|dat|config|log)$/i) ||
+                file.type === 'application/json' ||
+                file.type === '') {
+                
+                currentFile = file;
+                readFile(file);
+            } else {
+                showStatus('Por favor selecciona un archivo de configuración válido', 'error', 'uploadStatus');
+            }
+        }
+
+        function readFile(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                currentFileContent = e.target.result;
+                showFilePreview(currentFileContent);
+                updateUIState();
+            };
+            reader.readAsText(file, 'UTF-8');
+        }
+
+        function showFilePreview(content) {
+            const preview = document.getElementById('filePreview');
+            const previewText = content.length > 500 
+                ? content.substring(0, 500) + '\n\n... (vista previa truncada)'
+                : content;
+
+            preview.innerHTML = `
+                <div style="margin-top: 20px;">
+                    <div class="label">
+                        <i class="ph-eye"></i> Vista Previa (${(content.length / 1024).toFixed(2)} KB)
+                    </div>
+                    <div class="raw-viewer">${previewText}</div>
+                </div>
+            `;
+        }
+
+        async function handleSave() {
+            const appNameValue = appName.value.trim();
+            
+            if (!appNameValue) {
+                showStatus('Por favor ingresa el nombre de la app', 'error', 'uploadStatus');
+                return;
+            }
+
+            setLoading('save', true);
+
+            try {
+                if (editingAppKey) {
+                    await updateExistingApp(appNameValue);
+                } else {
+                    await createNewApp(appNameValue);
+                }
+            } catch (error) {
+                console.error('Error saving app:', error);
+                showStatus('❌ Error al guardar la app', 'error', 'uploadStatus');
+            } finally {
+                setLoading('save', false);
+            }
+        }
+
+        async function createNewApp(appNameValue) {
+            const appRef = ref(database, `vpn-apps/${appNameValue}`);
+            const snapshot = await get(appRef);
+            
+            if (snapshot.exists()) {
+                showStatus('❌ Ya existe una app con ese nombre', 'error', 'uploadStatus');
+                return;
+            }
+
+            const appData = {
+                name: appNameValue,
+                content: currentFileContent || null,
+                originalFilename: currentFile ? currentFile.name : null,
+                size: currentFileContent ? currentFileContent.length : 0,
+                uploadDate: new Date().toISOString(),
+                uploadedBy: auth.currentUser.email,
+                lastModified: new Date().toISOString(),
+                hasContent: !!currentFileContent
+            };
+
+            await set(appRef, appData);
+
+            if (currentFileContent) {
+                const publicLink = `${window.location.origin}${window.location.pathname}?app=${encodeURIComponent(appNameValue)}`;
+                showStatus(`✅ App "${appNameValue}" creada con contenido`, 'success', 'uploadStatus');
+                setTimeout(() => {
+                    showStatus(`🔗 Enlace público: ${publicLink}`, 'success', 'uploadStatus');
+                }, 2000);
+            } else {
+                showStatus(`✅ App "${appNameValue}" creada. Ahora puedes subir el archivo`, 'success', 'uploadStatus');
+            }
+            
+            clearForm();
+            loadApps();
+        }
+
+        async function updateExistingApp(appNameValue) {
+            if (!currentFileContent) {
+                showStatus('Por favor selecciona un archivo para actualizar', 'error', 'uploadStatus');
+                return;
+            }
+
+            const appRef = ref(database, `vpn-apps/${editingAppKey}`);
+            const snapshot = await get(appRef);
+            const existingData = snapshot.val();
+
+            const updatedData = {
+                ...existingData,
+                content: currentFileContent,
+                originalFilename: currentFile.name,
+                size: currentFileContent.length,
+                lastModified: new Date().toISOString(),
+                hasContent: true
+            };
+
+            await set(appRef, updatedData);
+
+            const publicLink = `${window.location.origin}${window.location.pathname}?app=${encodeURIComponent(editingAppKey)}`;
+            showStatus(`✅ App "${appNameValue}" actualizada exitosamente`, 'success', 'uploadStatus');
+            setTimeout(() => {
+                showStatus(`🔗 Enlace público: ${publicLink}`, 'success', 'uploadStatus');
+            }, 2000);
+            
+            clearForm();
+            loadApps();
+        }
+
+        async function loadApps() {
+            setLoading('refresh', true);
+
+            try {
+                const appsRef = ref(database, 'vpn-apps');
+                const snapshot = await get(appsRef);
+                const data = snapshot.val();
+
+                renderApps(data);
+            } catch (error) {
+                console.error('Error loading apps:', error);
+                showError('Error al cargar las aplicaciones');
+            } finally {
+                setLoading('refresh', false);
+            }
+        }
+
+        function renderApps(data) {
+            if (!data) {
+                appsList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="ph-folder-open empty-icon"></i>
+                        <div>No hay apps VPN configuradas</div>
+                        <div style="margin-top: 8px; font-size: 12px;">Crea tu primera app para comenzar</div>
+                    </div>
+                `;
+                return;
+            }
+
+            const apps = Object.entries(data).map(([key, app]) => ({ key, ...app }));
+            appsList.innerHTML = apps.map(app => createAppCard(app)).join('');
+        }
+
+        function createAppCard(app) {
+            const uploadDate = new Date(app.uploadDate).toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            const sizeKB = app.hasContent ? (app.size / 1024).toFixed(2) : '0';
+            const publicLink = `${window.location.origin}${window.location.pathname}?app=${encodeURIComponent(app.key)}`;
+            const statusBadge = app.hasContent 
+                ? '<span style="background: #2ed573; color: white; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 600;">✓ CON ARCHIVO</span>'
+                : '<span style="background: #ff6b6b; color: white; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 600;">⚠ SIN ARCHIVO</span>';
+
+            return `
+                <div class="card app-card">
+                    <div class="app-header">
+                        <div class="app-info">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                                <h3>${app.name}</h3>
+                                ${statusBadge}
+                            </div>
+                            <div class="app-meta">
+                                <span><i class="ph-calendar"></i> ${uploadDate}</span>
+                                <span><i class="ph-file"></i> ${sizeKB} KB</span>
+                                <span><i class="ph-user"></i> ${app.uploadedBy}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    ${app.hasContent ? `
+                        <div style="margin: 12px 0; padding: 8px; background: rgba(0,0,0,0.2); border-radius: 6px; font-size: 11px; font-family: monospace; word-break: break-all; color: var(--text-secondary);">
+                            <strong>🔗 Enlace público:</strong><br>
+                            ${publicLink}
+                        </div>
+                    ` : ''}
+                    
+                    <div class="app-actions">
+                        ${app.hasContent ? `
+                            <button class="btn btn-small" onclick="viewRaw('${app.key}', '${app.name}')">
+                                <i class="ph-code"></i> Ver Raw
+                            </button>
+                            <button class="btn btn-small" onclick="copyPublicLink('${publicLink}')">
+                                <i class="ph-link"></i> Copiar Enlace
+                            </button>
+                        ` : ''}
+                        <button class="btn btn-small btn-secondary" onclick="editApp('${app.key}', '${app.name}')">
+                            <i class="ph-pencil"></i> ${app.hasContent ? 'Actualizar' : 'Subir Archivo'}
+                        </button>
+                        <button class="btn btn-small btn-danger" onclick="deleteApp('${app.key}', '${app.name}')">
+                            <i class="ph-trash"></i> Eliminar
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Global functions for app actions
+        window.viewRaw = async function(appKey, appName) {
+            try {
+                const appRef = ref(database, `vpn-apps/${appKey}`);
+                const snapshot = await get(appRef);
+                const appData = snapshot.val();
+
+                if (appData && appData.hasContent) {
+                    showModal(appName, appData.content, appKey);
+                } else {
+                    showStatus('Esta app no tiene contenido todavía', 'error', 'uploadStatus');
+                }
+            } catch (error) {
+                console.error('Error loading app:', error);
+                showStatus('Error al cargar la aplicación', 'error', 'uploadStatus');
+            }
+        };
+
+        window.editApp = function(appKey, appName) {
+            editingAppKey = appKey;
+            appName = appName;
+            appName.disabled = true;
+            updateUIState();
+            document.querySelector('.grid-2').scrollIntoView({ behavior: 'smooth' });
+            showStatus(`Modo edición: ${appName}. Sube un archivo para actualizar.`, 'success', 'uploadStatus');
+        };
+
+        window.copyPublicLink = function(link) {
+            try {
+                navigator.clipboard.writeText(link).then(() => {
+                    showStatus('✅ Enlace público copiado al portapapeles', 'success', 'uploadStatus');
+                });
+            } catch (error) {
+                console.error('Error copying link:', error);
+                showStatus('❌ Error al copiar enlace', 'error', 'uploadStatus');
+            }
+        };
+
+        window.deleteApp = async function(appKey, appName) {
+            if (!confirm(`¿Estás seguro de que quieres eliminar "${appName}"?\n\nEsta acción no se puede deshacer.`)) {
+                return;
+            }
+
+            try {
+                const appRef = ref(database, `vpn-apps/${appKey}`);
+                await remove(appRef);
+                
+                showStatus(`✅ App "${appName}" eliminada exitosamente`, 'success', 'uploadStatus');
+                
+                if (editingAppKey === appKey) {
+                    clearForm();
+                }
+                
+                loadApps();
+            } catch (error) {
+                console.error('Error deleting app:', error);
+                showStatus('❌ Error al eliminar la app', 'error', 'uploadStatus');
+            }
+        };
+
+        function clearForm() {
+            fileInput.value = '';
+            appName.value = '';
+            appName.disabled = false;
+            currentFile = null;
+            currentFileContent = null;
+            editingAppKey = null;
+            document.getElementById('filePreview').innerHTML = '';
+            updateUIState();
+        }
+
+        function cancelEdit() {
+            clearForm();
+            showStatus('Edición cancelada', 'success', 'uploadStatus');
+        }
+
+        // Modal Functions
+        let currentContent = '';
+        let currentAppName = '';
+        let currentAppKey = '';
+
+        function showModal(appName, content, appKey) {
+            currentAppName = appName;
+            currentContent = content;
+            currentAppKey = appKey;
+            
+            modalAppName.textContent = appName;
+            fileContent.textContent = content;
+            
+            rawModal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function hideModal() {
+            rawModal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        function downloadContent() {
+            try {
+                const blob = new Blob([currentContent], { type: 'text/plain;charset=utf-8' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${currentAppName}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+                
+                showToast('✅ Archivo descargado');
+            } catch (error) {
+                console.error('Error downloading file:', error);
+                showToast('❌ Error al descargar');
+            }
+        }
+
+        function copyContent() {
+            try {
+                navigator.clipboard.writeText(currentContent).then(() => {
+                    showToast('✅ Contenido copiado al portapapeles');
+                });
+            } catch (error) {
+                console.error('Error copying content:', error);
+                showToast('❌ Error al copiar');
+            }
+        }
+
+        function copyPublicLink() {
+            const publicLink = `${window.location.origin}${window.location.pathname}?app=${encodeURIComponent(currentAppKey)}`;
+            try {
+                navigator.clipboard.writeText(publicLink).then(() => {
+                    showToast('✅ Enlace público copiado al portapapeles');
+                });
+            } catch (error) {
+                console.error('Error copying link:', error);
+                showToast('❌ Error al copiar enlace');
+            }
+        }
+
+        // Public Viewer Functions
+        async function loadPublicApp(appKey) {
+            try {
+                publicFileContent.innerHTML = `
+                    <div style="text-align: center; padding: 60px; color: var(--text-secondary);">
+                        <div class="loading" style="margin: 0 auto 20px;"></div>
+                        <div>Cargando configuración...</div>
+                    </div>
+                `;
+
+                const appRef = ref(database, `vpn-apps/${appKey}`);
+                const snapshot = await get(appRef);
+                const appData = snapshot.val();
+
+                if (appData && appData.hasContent) {
+                    publicAppName.textContent = `${appData.name} - Configuración VPN`;
+                    publicFileContent.textContent = appData.content;
+                    
+                    // Store for download/copy
+                    currentContent = appData.content;
+                    currentAppName = appData.name;
+                } else {
+                    showPublicError('Configuración no encontrada o sin contenido');
+                }
+            } catch (error) {
+                console.error('Error loading public app:', error);
+                showPublicError('Error al cargar la configuración');
+            }
+        }
+
+        function downloadPublicContent() {
+            try {
+                const blob = new Blob([currentContent], { type: 'text/plain;charset=utf-8' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${currentAppName}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+                
+                showToast('✅ Archivo descargado');
+            } catch (error) {
+                console.error('Error downloading file:', error);
+                showToast('❌ Error al descargar');
+            }
+        }
+
+        function copyPublicContent() {
+            try {
+                navigator.clipboard.writeText(currentContent).then(() => {
+                    showToast('✅ Contenido copiado al portapapeles');
+                });
+            } catch (error) {
+                console.error('Error copying content:', error);
+                showToast('❌ Error al copiar');
+            }
+        }
+
+        function showPublicError(message) {
+            publicFileContent.innerHTML = `
+                <div style="text-align: center; padding: 60px; color: #ff4757;">
+                    <i class="ph-warning-circle" style="font-size: 48px; margin-bottom: 16px;"></i>
+                    <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">Error</div>
+                    <div>${message}</div>
+                </div>
+            `;
+        }
+
+        // Utility Functions
+        function setLoading(type, isLoading) {
+            const textElement = document.getElementById(`${type}Text`);
+            const loadingElement = document.getElementById(`${type}Loading`);
+            const buttonElement = document.getElementById(`${type}Btn`);
+
+            if (textElement && loadingElement && buttonElement) {
+                if (isLoading) {
+                    textElement.classList.add('hidden');
+                    loadingElement.classList.remove('hidden');
+                    buttonElement.disabled = true;
+                } else {
+                    textElement.classList.remove('hidden');
+                    loadingElement.classList.add('hidden');
+                    buttonElement.disabled = false;
+                }
+            }
+        }
+
+        function showStatus(message, type, elementId) {
+            const statusElement = document.getElementById(elementId);
+            statusElement.textContent = message;
+            statusElement.className = `status ${type} show`;
+            
+            setTimeout(() => {
+                statusElement.classList.remove('show');
+            }, 5000);
+        }
+
+        function showError(message) {
+            appsList.innerHTML = `
+                <div class="empty-state">
+                    <i class="ph-warning-circle empty-icon" style="color: #ff4757;"></i>
+                    <div style="color: #ff4757;">${message}</div>
+                </div>
+            `;
+        }
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: var(--bg-card);
+                color: var(--text-primary);
+                padding: 12px 20px;
+                border-radius: 10px;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                backdrop-filter: blur(20px);
+                z-index: 10000;
+                font-family: var(--font-family);
+                font-weight: 600;
+                font-size: 14px;
+                opacity: 0;
+                transform: translateX(100%);
+                transition: all 0.3s ease-in-out;
+            `;
+            toast.textContent = message;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '1';
+                toast.style.transform = 'translateX(0)';
+            }, 100);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        // Initialize
+        updateUIState();
+        console.log('🔥 VPN Manager initialized successfully');
+    </script>
 </body>
 </html>
