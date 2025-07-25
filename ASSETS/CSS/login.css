@@ -1,0 +1,61 @@
+/* ==================== ASSETS/CSS/LOGIN.CSS ==================== */
+
+.login-screen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.login-container {
+    width: 100%;
+    max-width: 400px;
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.login-title {
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.login-subtitle {
+    color: var(--text-secondary);
+    font-size: 16px;
+    font-weight: 400;
+}
+
+.login-form {
+    padding: 30px;
+}
+
+.login-icon {
+    font-size: 64px;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    text-shadow: 0 0 30px var(--glow-primary);
+}
+
+/* Responsive login */
+@media (max-width: 480px) {
+    .login-form {
+        padding: 20px;
+    }
+    
+    .login-title {
+        font-size: 28px;
+    }
+    
+    .login-icon {
+        font-size: 48px;
+    }
+}

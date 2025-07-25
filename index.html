@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VPN Manager - Sistema de Gestión</title>
+    <link rel="icon" href="assets/IMG/cris.png" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/phosphor-icons/2.0.2/phosphor.min.css" rel="stylesheet">
+    
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="assets/css/global.css">
+    <link rel="stylesheet" href="assets/css/login.css">
+    <link rel="stylesheet" href="assets/css/dashboard.css">
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-screen">
+        <div class="login-container">
+            <div class="card">
+                <div class="login-form">
+                    <div class="login-header">
+                        <i class="ph-shield-check login-icon"></i>
+                        <h1 class="login-title glow-text">VPN Manager</h1>
+                        <p class="login-subtitle">Sistema de gestión de configuraciones</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="label" for="loginEmail">
+                            <i class="ph-envelope"></i> Email
+                        </label>
+                        <input type="email" id="loginEmail" class="input" placeholder="admin@vpnmanager.com" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="label" for="loginPassword">
+                            <i class="ph-lock"></i> Contraseña
+                        </label>
+                        <input type="password" id="loginPassword" class="input" placeholder="••••••••" required>
+                    </div>
+                    
+                    <button class="btn" id="loginBtn" style="width: 100%; margin-bottom: 12px;">
+                        <i class="ph-sign-in"></i>
+                        <span id="loginText">Iniciar Sesión</span>
+                        <span id="loginLoading" class="loading hidden"></span>
+                    </button>
+                    
+                    <button class="btn btn-secondary" id="registerBtn" style="width: 100%;">
+                        <i class="ph-user-plus"></i>
+                        <span id="registerText">Crear Cuenta</span>
+                        <span id="registerLoading" class="loading hidden"></span>
+                    </button>
+                    
+                    <div class="status" id="loginStatus"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Screen -->
+    <div id="dashboardScreen" class="hidden">
+        <div class="container">
+            <!-- Navbar -->
+            <nav class="navbar">
+                <div class="navbar-brand">
+                    <i class="ph-shield-check" style="color: var(--primary-color);"></i>
+                    <span class="glow-text">VPN Manager</span>
+                </div>
+                <div class="navbar-user">
+                    <i class="ph-user"></i>
+                    <span id="userEmail"></span>
+                    <button class="btn btn-small" id="logoutBtn">
+                        <i class="ph-sign-out"></i>
+                        Cerrar Sesión
+                    </button>
+                </div>
+            </nav>
+
+            <!-- Main Content Grid -->
+            <div class="grid-2">
+                <!-- Upload Section -->
+                <div class="card" style="padding: 30px;">
+                    <h2 class="section-title">
+                        <i class="ph-upload" style="color: var(--primary-color);"></i>
+                        Gestionar App VPN
+                    </h2>
+                    
+                    <div class="file-upload-area" id="uploadArea">
+                        <i class="ph-file-plus upload-icon"></i>
+                        <div class="upload-text">Subir configuración VPN</div>
+                        <div class="upload-subtext">Arrastra tu archivo .json aquí o haz clic para seleccionar</div>
+                        <input type="file" id="fileInput" class="hidden" accept=".json,.txt,.dat,.config">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="label" for="appName">
+                            <i class="ph-tag"></i> Nombre de la App
+                        </label>
+                        <input type="text" id="appName" class="input" placeholder="Mi App VPN">
+                    </div>
+
+                    <button class="btn" id="saveBtn" style="width: 100%;">
+                        <i class="ph-floppy-disk"></i>
+                        <span id="saveText">Guardar Configuración</span>
+                        <span id="saveLoading" class="loading hidden"></span>
+                    </button>
+
+                    <button class="btn btn-secondary" id="cancelBtn" style="width: 100%; margin-top: 10px; display: none;">
+                        <i class="ph-x"></i>
+                        Cancelar Edición
+                    </button>
+
+                    <div class="status" id="uploadStatus"></div>
+
+                    <div id="filePreview"></div>
+                </div>
+
+                <!-- Apps List -->
+                <div class="card" style="padding: 30px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2 class="section-title" style="margin-bottom: 0;">
+                            <i class="ph-list" style="color: var(--secondary-color);"></i>
+                            Apps VPN
+                        </h2>
+                        <button class="btn btn-small" id="refreshBtn">
+                            <i class="ph-arrow-clockwise"></i>
+                            <span id="refreshText">Actualizar</span>
+                            <span id="refreshLoading" class="loading hidden"></span>
+                        </button>
+                    </div>
+                    
+                    <div id="appsList" class="apps-grid">
+                        <div class="empty-state">
+                            <i class="ph-folder-open empty-icon"></i>
+                            <div>Cargando aplicaciones...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Raw Viewer Modal -->
+    <div id="rawModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <i class="ph-code"></i>
+                    <span id="modalAppName">Configuración Raw</span>
+                </div>
+                <div style="display: flex; gap: 12px; align-items: center;">
+                    <button class="btn btn-small" id="copyLinkBtn">
+                        <i class="ph-link"></i>
+                        Copiar Enlace
+                    </button>
+                    <button class="btn btn-small" id="downloadBtn">
+                        <i class="ph-download"></i>
+                        Descargar
+                    </button>
+                    <button class="btn btn-small" id="copyContentBtn">
+                        <i class="ph-copy"></i>
+                        Copiar
+                    </button>
+                    <button class="modal-close" id="closeModal">
+                        <i class="ph-x"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="file-content" id="fileContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Public Raw Viewer -->
+    <div id="publicRawScreen" class="hidden">
+        <div class="container">
+            <div class="card" style="padding: 30px; margin-top: 20px;">
+                <div class="modal-header" style="padding: 0; border: none; margin-bottom: 20px;">
+                    <div class="modal-title">
+                        <i class="ph-code"></i>
+                        <span id="publicAppName">Configuración VPN</span>
+                    </div>
+                    <div style="display: flex; gap: 12px; align-items: center;">
+                        <button class="btn btn-small" id="publicDownloadBtn">
+                            <i class="ph-download"></i>
+                            Descargar
+                        </button>
+                        <button class="btn btn-small" id="publicCopyBtn">
+                            <i class="ph-copy"></i>
+                            Copiar
+                        </button>
+                    </div>
+                </div>
+                <div class="file-content" id="publicFileContent" style="min-height: 400px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Files -->
+    <script type="module" src="assets/js/firebase.js"></script>
+    <script type="module" src="assets/js/auth.js"></script>
+    <script type="module" src="assets/js/app_manager.js"></script>
+    <script type="module" src="assets/js/raw_viewer.js"></script>
+    <script type="module" src="assets/js/public_viewer.js"></script>
+    <script type="module" src="assets/js/main.js"></script>
+</body>
+</html>
