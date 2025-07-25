@@ -821,6 +821,75 @@
         const publicDownloadBtn = document.getElementById('publicDownloadBtn');
         const publicCopyBtn = document.getElementById('publicCopyBtn');
 
+        // Check for raw content request IMMEDIATELY
+        const urlParams = new URLSearchParams(window.location.search);
+        const publicAppKey = urlParams.get('app');
+        const rawParam = urlParams.get('raw');
+        
+        // If there's an app parameter, load raw content immediately
+        if (publicAppKey || rawParam) {
+            const appKey = publicAppKey || rawParam;
+            console.log('Raw content request for:', appKey);
+            loadRawContentImmediate(appKey);
+        }
+        
+        // Raw Content Loader - Execute immediately without waiting for auth
+        async function loadRawContentImmediate(appKey) {
+            try {
+                // Decode URL component (handle %20 spaces, etc.)
+                let decodedAppKey = decodeURIComponent(appKey);
+                console.log('Loading immediate raw content for:', decodedAppKey);
+                
+                // Initialize Firebase immediately for raw content
+                const appRef = ref(database, `vpn-apps/${decodedAppKey}`);
+                const snapshot = await get(appRef);
+                let appData = snapshot.val();
+                
+                // If not found, try case-insensitive search
+                if (!appData) {
+                    console.log('Exact match not found, trying case-insensitive search...');
+                    const appsRef = ref(database, 'vpn-apps');
+                    const allApps = await get(appsRef);
+                    const allAppsData = allApps.val();
+                    
+                    if (allAppsData) {
+                        const foundKey = Object.keys(allAppsData).find(key => 
+                            key.toLowerCase() === decodedAppKey.toLowerCase()
+                        );
+                        
+                        if (foundKey) {
+                            appData = allAppsData[foundKey];
+                            console.log('Found case-insensitive match:', foundKey);
+                        }
+                    }
+                }
+
+                // Clear everything and show only raw content
+                if (appData && appData.hasContent && appData.content) {
+                    console.log('Serving raw content, size:', appData.content.length);
+                    
+                    // Completely replace the page with just the content
+                    document.open();
+                    document.write(appData.content);
+                    document.close();
+                    
+                } else {
+                    console.log('Configuration not found or empty for:', decodedAppKey);
+                    
+                    // Show error
+                    document.open();
+                    document.write('Error: Configuration not found or empty');
+                    document.close();
+                }
+            } catch (error) {
+                console.error('Error loading raw content:', error);
+                
+                document.open();
+                document.write('Error: Failed to load configuration - ' + error.message);
+                document.close();
+            }
+        }
+
         // Authentication State Listener
         onAuthStateChanged(auth, (user) => {
             // Check if accessing public app view
